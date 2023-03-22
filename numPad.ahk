@@ -1,4 +1,5 @@
 ﻿#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+#InstallKeybdHook ; for something idk
 ; #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
@@ -12,60 +13,114 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; ^ means ctrl
 ; ! means alt
 
+; How to do if statements
+; if (this = that) 
+; 	do this			; must be underneath if expression
 
-#InstallKeybdHook ; for something idk
-SendSuppressedKeyUp(key) {
-    DllCall("keybd_event"
-        , "char", GetKeyVK(key)
-        , "char", GetKeySC(key)
-        , "uint", KEYEVENTF_KEYUP := 0x2
-        , "uptr", KEY_BLOCK_THIS := 0xFFC3D450)
-}
 
+; #### Always active ####
+;~LAlt::SendSuppressedKeyUp("LAlt")
 
 ; adding home and end by arrows by using alt instead of fn
-;~LAlt::SendSuppressedKeyUp("LAlt")
-!Left::send {Home}
-!Right::send {End}
+!Left::send {Home}		; alt + left  = home
+!Right::send {End}		; alt + right = end
 
+; makes it possible to also highlight text with the hotkeys above for home and end
 +!Left::send +{Home}
 +!Right::send +{End}
 
-
-;!Left::Home
-;NumpadRight::End
-
-;NumpadClear::^d
-NumpadHome::!F12  ; NumpadEnd::!F12
-NumpadPgUp::+F12
-NumpadUp:: send ^d^f ; searches word
-
-NumpadEnd:: send ^d^c
-NumpadPgDn:: send ^d^v
-NumpadDown:: send ^d+8
-
-
-NumpadIns:: send !o ; switches between header and source file.
-
-NumpadAdd::^+b ; builds the code
-NumpadEnter::^F5 ; runs file
-
-:?*:.-::-> ; turn double dot into arrow
-
-NumpadDel:: send (millis() - ){Left} ; quicl write time comparison for coding
-
-; fits colums to text and freezes top row in excel
-; NumpadMult::send ^a^a!hoi!wfr
-
-; for norwegian excel
-; NumpadDiv::send ^a^a!hafi!ncr
-; NumpadDiv::
-
 ; Shift + Wheel for horizontal scrolling
 +WheelDown::WheelRight
-
 +WheelUp::WheelLeft
 
+
+; ###### Mode Dependent Hotkeys #######
+
+; Modes
+; 0 = Code Mode
+; 1 = Misc Mode
+; 3 = idk yet
+
+modeTracker := 0
+
+; ####### Code Mode ######
+#If modeTracker = 0
+NumpadIns:: send !o 	; numpad 0 : switches between header and source file.
+NumpadEnd:: send ^d^c 	; numpad 1 : copy word
+NumpadDown:: send ^d+8	; numpad 2 : puts brackets around word
+NumpadPgDn:: send ^d^v	; numpad 3 : paste word
+; NumpadLeft:: 			; numpad 4 : display meme
+; NumpadClear:: 		; numpad 5 : do nothing
+NumpadHome::!F12    	; numpad 7 : peek definition
+NumpadUp:: send ^d^f 	; numpad 8 : searches word
+NumpadPgUp::+F12		; numpad 9 : peek references
+
+NumpadAdd::^+b 		; numpad + : builds the code
+NumpadEnter::^F5 	; numpad Enter : runs file
+NumpadDel:: send (millis() - ){Left} 	; numpad delete :  quicl write time comparison for coding
+
+
+; other hotkeys and macros
+:?*:.-::-> ; turn double dot into arrow
+#If
+
+
+; ####### Misc Mode ######
+#If modeTracker = 1
+NumpadLeft:: memeFunc()			; numpad 4 : display meme
+NumpadUp::send ^a^a!hoi!wfr 	; numpad 8 : fits colums to text and freezes top row in excel
+NumpadPgup::send ^a^a!hafi!ncr 	; numpad 9 : ^^ for norwegian excel
+
+
+
+#If
+
+
+; #### Change Mode ####
+NumpadDiv::
+	data := "Code Mode"
+	modeTracker := 0
+	DisplayTextOnScreen(data)
+	return
+
+NumpadMult::
+	data := "Misc Mode"
+	modeTracker := 1
+	DisplayTextOnScreen(data)
+	return
+
+NumpadSub::
+	data := "IDK Mode"
+	modeTracker := 2
+	DisplayTextOnScreen(data)
+	return
+
+
+; ##### GUI STUFF #####
+; function to display some text on screen
+DisplayTextOnScreen(data) {
+	SetTimer, modeTextTimer, 1000
+	; https://www.autohotkey.com/boards/viewtopic.php?p=395842#p395842
+	Gui, -Caption +AlwaysOnTop +Owner +LastFound +E0x20
+	WinSet, TransColor, 1
+	Gui, Color, 1
+	Gui, Font, c00FF00 s30 w700 q4, Times New Roman
+	Gui, Add, Text,, % data
+	Gui, Show, Xcenter Y50 NA
+	return
+}
+
+; Make it alsways possible to disable GUI
+^Esc::Gui, Destroy
+
+; triggered by GUI timer to remove GUI text
+modeTextTimer:
+	Gui, Destroy
+	SetTimer, modeTextTimer, off
+	return
+
+
+; ###### Other Functions #######
 
 ; open a random meme
 ; change the dirpath to whatever folder your memes are in
@@ -98,46 +153,15 @@ memeFunc()
 	
 	Run %memePath%
 
-	;MsgBox, 4,, File number "%memePath%" is file.  Continue?"
-	
+	;MsgBox, 4,, File number "%memePath%" is file.  Continue?"	
 }
 
-; choose a button to press to call the function
-NumpadLeft::memeFunc()
 
-
-
-
-
-; sonme testing
-NumpadDiv::
-	data := "Code Mode"
-	DisplayTextOnScreen(data)
-	return
-
-NumpadMult::
-	data := "Misc Mode"
-	DisplayTextOnScreen(data)
-	return
-
-; function to display some text on screen
-DisplayTextOnScreen(data) {
-	SetTimer, modeTextTimer, 1000
-	; https://www.autohotkey.com/boards/viewtopic.php?p=395842#p395842
-	Gui, -Caption +AlwaysOnTop +Owner +LastFound +E0x20
-	WinSet, TransColor, 1
-	Gui, Color, 1
-	Gui, Font, c00FF00 s30 w700 q4, Times New Roman
-	Gui, Add, Text,, % data
-	Gui, Show, Xcenter Y50 NA
-	return
+; not sure what this was used for exactly
+SendSuppressedKeyUp(key) {
+    DllCall("keybd_event"
+        , "char", GetKeyVK(key)
+        , "char", GetKeySC(key)
+        , "uint", KEYEVENTF_KEYUP := 0x2
+        , "uptr", KEY_BLOCK_THIS := 0xFFC3D450)
 }
-
-; Make it alsways possible to disable GUI
-^Esc::Gui, Destroy
-
-; triggered by GUI timer to remove GUI text
-modeTextTimer:
-	Gui, Destroy
-	SetTimer, modeTextTimer, off
-	return
