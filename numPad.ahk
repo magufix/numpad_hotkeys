@@ -49,8 +49,9 @@ NumpadIns:: send !o 	; numpad 0 : switches between header and source file.
 NumpadEnd:: send ^d^c 	; numpad 1 : copy word
 NumpadDown:: send ^d+8	; numpad 2 : puts brackets around word
 NumpadPgDn:: send ^d^v	; numpad 3 : paste word
-; NumpadLeft:: 			; numpad 4 : display meme
+; NumpadLeft:: 			; numpad 4 : do nothing
 ; NumpadClear:: 		; numpad 5 : do nothing
+NumpadRight::^|			; numpad 6 : do nothing
 NumpadHome::!F12    	; numpad 7 : peek definition
 NumpadUp:: send ^d^f 	; numpad 8 : searches word
 NumpadPgUp::+F12		; numpad 9 : peek references
@@ -80,18 +81,24 @@ NumpadPgup::send ^a^a!hafi!ncr 	; numpad 9 : ^^ for norwegian excel
 NumpadDiv::
 	data := "Code Mode"
 	modeTracker := 0
+	Gui, Destroy
+	SetTimer, modeTextTimer, off
 	DisplayTextOnScreen(data)
 	return
 
 NumpadMult::
 	data := "Misc Mode"
 	modeTracker := 1
+	Gui, Destroy
+	SetTimer, modeTextTimer, off
 	DisplayTextOnScreen(data)
 	return
 
 NumpadSub::
 	data := "IDK Mode"
 	modeTracker := 2
+	Gui, Destroy
+	SetTimer, modeTextTimer, off
 	DisplayTextOnScreen(data)
 	return
 
@@ -99,7 +106,7 @@ NumpadSub::
 ; ##### GUI STUFF #####
 ; function to display some text on screen
 DisplayTextOnScreen(data) {
-	SetTimer, modeTextTimer, 1000
+	SetTimer, modeTextTimer, 1500
 	; https://www.autohotkey.com/boards/viewtopic.php?p=395842#p395842
 	Gui, -Caption +AlwaysOnTop +Owner +LastFound +E0x20
 	WinSet, TransColor, 1
