@@ -28,7 +28,6 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; makes it possible to also highlight text with the hotkeys above for home and end
 +!Left::send +{Home}
 +!Right::send +{End}
-
 ; Shift + Wheel for horizontal scrolling
 +WheelDown::WheelRight
 +WheelUp::WheelLeft
@@ -50,7 +49,7 @@ NumpadEnd:: send ^d^c 	; numpad 1 : copy word
 NumpadDown:: send ^d+8	; numpad 2 : puts brackets around word
 NumpadPgDn:: send ^d^v	; numpad 3 : paste word
 ; NumpadLeft:: 			; numpad 4 : do nothing
-; NumpadClear:: 		; numpad 5 : do nothing
+NumpadClear::send docker exec -ti {CtrlDown} v {CtrlUp} /bin/bash  		; numpad 5 : paste docker string
 NumpadRight::^|			; numpad 6 : do nothing
 NumpadHome::!F12    	; numpad 7 : peek definition
 NumpadUp:: send ^d^f 	; numpad 8 : searches word
@@ -109,9 +108,9 @@ DisplayTextOnScreen(data) {
 	SetTimer, modeTextTimer, 1500
 	; https://www.autohotkey.com/boards/viewtopic.php?p=395842#p395842
 	Gui, -Caption +AlwaysOnTop +Owner +LastFound +E0x20
-	WinSet, TransColor, 1
+	WinSet, TransColor, 2
 	Gui, Color, 1
-	Gui, Font, c00FF00 s30 w700 q4, Times New Roman
+	Gui, Font, c00FF00 s30 w700 q2 bold, Consolas
 	Gui, Add, Text,, % data
 	Gui, Show, Xcenter Y50 NA
 	return
